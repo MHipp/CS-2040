@@ -1,54 +1,85 @@
 ﻿using System;
+using System.Collections.Generic;
 
-namespace Dog1
+namespace URLEncoder
 {
-    class Dog
+    class Program
     {
-        string name;
-        string owner;
-        int age;
-        enum Gender
-        {
-            Male,
-            Female
-        }
-        public Dog(string name1, string owner1, int age1)
-        {
-            name = name1;
-            owner = owner1;
-            age = age1;
+        static string urlFormatString = "https://companyserver.com/content/{0}/files/{1}/{1}Report.pdf";
 
-        }
-        /*public void GetTag()
+        static Dictionary<string, string> characterMap = new Dictionary<string, string>
         {
-            if (Gender == Male)
-            {
-                string gender1 = "his";
-                string gender2 = "he";
-            }
-            else
-            {
-                string gender1 = "her";
-                string gender2 = "she";
-            }
-            Console.WriteLine("If lost, call " + owner + ". " + gender1 + " name is " + name + " and " + gender2 + " is " + age + " years old.");
-        }*/
-        public void Bark(int woofs)
-        {
-            for(; woofs > 0; woofs--)
-            {
-                Console.WriteLine("Bark!");
-            }
-        }
+            {" ", "%20"}, {"<", "%3C"}, {">", "%3E"}, {"#", "%23"}, {"\"", "%22"}, 
+            {";", "%3B"}, {"/", "%2F"}, {"?", "%3F"}, {":", "%3A"}, {"@", "%40"}, 
+            {"&", "%26"}, {"=", "%3D"}, {"+", "%2B"}, {"$", "%24"}, {",", "%2C"}, 
+            {"{", "%7B"}, {"}", "%7D"}, {"|", "%7C"}, {"\\", "%5C"}, {"^", "%5E"}, 
+            {"[", "%5B"}, {"]", "%5D"}, {"`", "%60"}
+        };
         static void Main(string[] args)
         {
-            Dog puppy = Dog("Orion", "Shawn", 1, Gender.Male);  // create object instance
-            puppy.Bark(3); // output: Woof!Woof!Woof!
-            Console.WriteLine(puppy.GetTag()); // output: If lost, call Shawn. His name is Orion and he is 1 year old.
+            Console.WriteLine("URL Encoder");
 
-            Dog myDog = Dog("Lileu", "Dale", 4, Gender.Female);  // create object instance
-            myDog.Bark(1); // output: Woof!
-            Console.WriteLine(myDog.GetTag()); // output: If lost, call Dale. Her name is Lileu and she is 4 years old.
+            do
+            {
+                Console.Write("\nProject name: ");
+                string projectName = GetUserInput();
+                Console.Write("Activity name: ");
+                string activityName = GetUserInput();
+
+                Console.WriteLine(CreateURL(projectName, activityName));
+
+                Console.Write("Would you like to do another? (y/n): ");
+            } while (Console.ReadLine().ToLower().Equals("y"));
+        }
+
+        static string CreateURL(string projectName, string activityName) {
+            // create the URL string and return it
+            return String.Format(urlFormatString, Encode(projectName), Encode(activityName));
+        }
+
+        static string GetUserInput()                             
+        {
+            // get valid input from the user
+            // disallow strings with control characters
+            // IsValid() below is used to check if input is valid
+            string input = "";
+	        do
+	        {   
+		        input = Console.ReadLine();
+		        if (IsValid(input)) return input;
+		        Console.Write("The input contains invalid characters. Enter again: ");
+	        } while (true);
+        }
+
+        static bool IsValid(string input) {
+            // check if the string is valid and does not
+            // contain control characters
+            // if valid, return true
+            // if not valid, return false
+            foreach (char character in input.ToCharArray()) {
+	            // check each character to see if it matches any of the not-allowed control characters
+                if ((character >= 0x00 && character <= 0x1F) || character == 0x7F ) {
+                    return false;
+	            // do something about the character being 0x1F
+                }
+            }
+            return true;
+        }
+
+        static string Encode(string value)
+        {
+            // return an encoded version of the 
+            // string provided in value
+            string encodedValue = "";
+	        foreach (char character in value.ToCharArray()) {
+		        // build the encodedValue string by getting each character
+		        // in the original string and adding it to encodedValue if the original is ok
+		        // OR changing it to an encoded value and adding the encoded value to the string
+		        // if it is one of the values that needs to change
+                string characterString = character.ToString();
+                encodedValue += characterMap.GetValueOrDefault(characterString, characterString);
+	        }
+	        return encodedValue;
         }
     }
 }
